@@ -9,7 +9,7 @@ import (
 
 var maxBytes = 10 << 20
 
-// SetMaxBytes sets the maximum number of bytes allowed in the request body. Default is 10 << 20.
+// SetMaxBytes sets the maximum number of bytes allowed in the request body. Default is 10485760.
 func SetMaxBytes(mb int) {
 	maxBytes = mb
 }

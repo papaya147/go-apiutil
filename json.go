@@ -60,7 +60,9 @@ func WriteJson(w http.ResponseWriter, status int, data any, headers ...http.Head
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(status)
 	_, err = w.Write(out)
-	fmt.Printf("error writing response: %s", err)
+	if err != nil {
+		fmt.Printf("error writing response: %s", err)
+	}
 }
 
 // ErrorJson writes a json response with the specified error. A non HTTPError type will follow:

@@ -11,7 +11,7 @@ import (
 
 type TokenType int
 
-type Payload interface {
+type TokenPayload interface {
 	GetTokenId() uuid.UUID
 	GetIssuedAt() time.Time
 	GetExpiresAt() time.Time
@@ -22,12 +22,12 @@ type Payload interface {
 	SetType(TokenType)
 }
 
-type Maker[P Payload] interface {
+type TokenMaker[P TokenPayload] interface {
 	CreateToken(P, TokenType) (string, P, error)
 	VerifyToken(string, TokenType) (P, error)
 }
 
-type PasetoMaker[P Payload] struct {
+type PasetoMaker[P TokenPayload] struct {
 	tokenDuration                        map[TokenType]time.Duration
 	secretKey                            paseto.V4SymmetricKey
 	parser                               paseto.Parser
@@ -83,7 +83,7 @@ func (p PasetoMaker[P]) VerifyToken(s string, tokenType TokenType) (P, error) {
 	return payload, nil
 }
 
-func NewPasetoMaker[P Payload](durations map[TokenType]time.Duration, invalidTokenError, expiredTokenError error) Maker[P] {
+func NewPasetoMaker[P TokenPayload](durations map[TokenType]time.Duration, invalidTokenError, expiredTokenError error) TokenMaker[P] {
 	parser := paseto.NewParser()
 	parser.AddRule(paseto.NotExpired(), paseto.NotBeforeNbf())
 
@@ -127,7 +127,7 @@ func (j JWTPayload) GetAudience() (jwt.ClaimStrings, error) {
 	return nil, nil
 }
 
-type JWTMaker[P Payload] struct {
+type JWTMaker[P TokenPayload] struct {
 	tokenDuration                        map[TokenType]time.Duration
 	secretKey                            []byte
 	signingMethod                        jwt.SigningMethod
@@ -193,7 +193,7 @@ func (j JWTMaker[P]) VerifyToken(s string, tokenType TokenType) (P, error) {
 	return payload, nil
 }
 
-func NewJWTMaker[P Payload](durations map[TokenType]time.Duration, invalidTokenError, expiredTokenError error, secret string) Maker[P] {
+func NewJWTMaker[P TokenPayload](durations map[TokenType]time.Duration, invalidTokenError, expiredTokenError error, secret string) TokenMaker[P] {
 	signingMethod := jwt.SigningMethodHS256
 
 	return &JWTMaker[P]{

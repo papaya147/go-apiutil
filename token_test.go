@@ -60,7 +60,7 @@ func randomTokenType() TokenType {
 	return AccessTokenTypeTest
 }
 
-func createRandomToken(t *testing.T, maker Maker[TestTokenPayload]) (string, TestTokenPayload) {
+func createRandomToken(t *testing.T, maker TokenMaker[TestTokenPayload]) (string, TestTokenPayload) {
 	randomize.RegisterCustomRandomizer(randomTokenType)
 	arg, err := randomize.Do[TestTokenPayload]()
 	require.NoError(t, err)

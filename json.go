@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"github.com/go-playground/validator/v10"
 	"net/http"
 )
 
@@ -31,6 +32,17 @@ func ReadJson[I any](w http.ResponseWriter, r *http.Request) (I, error) {
 	return out, nil
 }
 
+// ReadJsonAndValidate reads a json request body into the specified struct and validates it. The maximum read bytes is defined by `maxBytes`.
+// The customValidators parameter is a map of field name to custom validation function.
+func ReadJsonAndValidate[I any](w http.ResponseWriter, r *http.Request, customValidatorsSlice ...map[string]func(p validator.FieldLevel) bool) (I, error) {
+	data, err := ReadJson[I](w, r)
+	if err != nil {
+		return data, err
+	}
+
+	return data, ValidateRequest(data, customValidatorsSlice...)
+}
+
 // WriteJson writes a json response with the specified status and data.
 func WriteJson(w http.ResponseWriter, status int, data any, headers ...http.Header) error {
 	out, err := json.Marshal(data)
@@ -55,11 +67,11 @@ func WriteJson(w http.ResponseWriter, status int, data any, headers ...http.Head
 //   - Message: error.Error()
 //   - Detail: ""
 func ErrorJson(w http.ResponseWriter, err error) error {
-	httpErr, ok := err.(HTTPError)
-	if !ok {
-		httpErr.Message = err.Error()
+	var httpErr HTTPError
+	if !errors.As(err, &httpErr) {
+		httpErr.Message = "bad request"
 		httpErr.Status = http.StatusBadRequest
-		httpErr.Detail = ""
+		httpErr.Detail = err.Error()
 	}
 	return WriteJson(w, httpErr.Status, httpErr)
 }

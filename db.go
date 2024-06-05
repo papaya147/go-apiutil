@@ -7,7 +7,8 @@ import (
 	"time"
 )
 
-func ConnectPostgres(dsn string, waitTime time.Duration) *pgxpool.Pool {
+// NewPostgresPool creates a new postgres connection pool.
+func NewPostgresPool(dsn string, waitTime time.Duration) *pgxpool.Pool {
 	count := 0
 
 	for {

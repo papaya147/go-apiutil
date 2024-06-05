@@ -44,10 +44,11 @@ func ReadJsonAndValidate[I any](w http.ResponseWriter, r *http.Request, customVa
 }
 
 // WriteJson writes a json response with the specified status and data.
-func WriteJson(w http.ResponseWriter, status int, data any, headers ...http.Header) error {
+func WriteJson(w http.ResponseWriter, status int, data any, headers ...http.Header) {
 	out, err := json.Marshal(data)
 	if err != nil {
-		return fmt.Errorf("error marshalling data: %s", err)
+		fmt.Printf("error marshalling data: %s", err)
+		return
 	}
 
 	if len(headers) > 0 {
@@ -59,19 +60,19 @@ func WriteJson(w http.ResponseWriter, status int, data any, headers ...http.Head
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(status)
 	_, err = w.Write(out)
-	return fmt.Errorf("error writing response: %s", err)
+	fmt.Printf("error writing response: %s", err)
 }
 
 // ErrorJson writes a json response with the specified error. A non HTTPError type will follow:
 //   - Status: 400
-//   - Message: error.Error()
-//   - Detail: ""
-func ErrorJson(w http.ResponseWriter, err error) error {
+//   - Message: "bad request"
+//   - Detail: error.Error()
+func ErrorJson(w http.ResponseWriter, err error) {
 	var httpErr HTTPError
 	if !errors.As(err, &httpErr) {
 		httpErr.Message = "bad request"
 		httpErr.Status = http.StatusBadRequest
 		httpErr.Detail = err.Error()
 	}
-	return WriteJson(w, httpErr.Status, httpErr)
+	WriteJson(w, httpErr.Status, httpErr)
 }

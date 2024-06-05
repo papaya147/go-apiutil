@@ -5,18 +5,15 @@ import (
 	"encoding/json"
 	"errors"
 	jwt "github.com/golang-jwt/jwt/v5"
-	"github.com/google/uuid"
 	"time"
 )
 
 type TokenType int
 
 type TokenPayload interface {
-	GetTokenId() uuid.UUID
 	GetIssuedAt() time.Time
 	GetExpiresAt() time.Time
 	GetType() TokenType
-	SetTokenId(uuid.UUID)
 	SetIssuedAt(time.Time)
 	SetExpiresAt(time.Time)
 	SetType(TokenType)
@@ -37,7 +34,6 @@ type PasetoMaker[P TokenPayload] struct {
 func (p PasetoMaker[P]) CreateToken(payload P, tokenType TokenType) (string, P, error) {
 	now := time.Now()
 
-	payload.SetTokenId(uuid.New())
 	payload.SetIssuedAt(now)
 	payload.SetExpiresAt(now.Add(p.tokenDuration[tokenType]))
 	payload.SetType(tokenType)
@@ -138,7 +134,6 @@ type JWTMaker[P TokenPayload] struct {
 func (j JWTMaker[P]) CreateToken(payload P, tokenType TokenType) (string, P, error) {
 	now := time.Now()
 
-	payload.SetTokenId(uuid.New())
 	payload.SetIssuedAt(now)
 	payload.SetExpiresAt(now.Add(j.tokenDuration[tokenType]))
 	payload.SetType(tokenType)

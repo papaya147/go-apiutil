@@ -21,7 +21,7 @@ func ReadJson[I any](w http.ResponseWriter, r *http.Request) (I, error) {
 
 	var out I
 	dec := json.NewDecoder(r.Body)
-	if err := dec.Decode(out); err != nil {
+	if err := dec.Decode(&out); err != nil {
 		return out, fmt.Errorf("error decoding json: %s", err)
 	}
 

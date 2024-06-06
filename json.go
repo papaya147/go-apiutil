@@ -5,6 +5,7 @@ import (
 	"errors"
 	"fmt"
 	"github.com/go-playground/validator/v10"
+	"io"
 	"net/http"
 )
 
@@ -25,7 +26,7 @@ func ReadJson[I any](w http.ResponseWriter, r *http.Request) (I, error) {
 		return out, fmt.Errorf("error decoding json: %s", err)
 	}
 
-	if err := dec.Decode(&struct{}{}); err != nil {
+	if err := dec.Decode(&struct{}{}); err != io.EOF {
 		return out, errors.New("json body must contain only one object")
 	}
 

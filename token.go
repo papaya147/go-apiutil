@@ -237,7 +237,7 @@ func tokenMiddleware[P TokenPayload](tokenMaker TokenMaker[P], cookieStore *sess
 		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 			sess, _ := cookieStore.Get(r, sessionName)
 			token, ok := sess.Values[tokenType].(string)
-			if !ok {
+			if !ok || token == "" {
 				ErrorJson(w, errInvalidCookie)
 				return
 			}
